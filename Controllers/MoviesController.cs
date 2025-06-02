@@ -14,7 +14,6 @@ public class MoviesController : ControllerBase
         new Movie {Id = 4, Title = "Twin Peaks", Type = "TV Show", ReleaseYear = 1990, Genre = "Crime/Horror/Mystery/Soap", Director = "David Lynch", ImageURL = "http://localhost:5155/Images/peaks.jpg"}
     };
 
-
     public MoviesController(AppDbContext context)
     {
         _context = context;
@@ -47,13 +46,5 @@ public class MoviesController : ControllerBase
         {
             return NotFound();
         }
-    }
-
-    [HttpGet("update")]
-    public IEnumerable<Movie> UpdateDatabase()
-    {
-        _context.Movies.AddRange(movies);
-        _context.SaveChanges();
-        return _context.Movies.ToList();
     }
 }
