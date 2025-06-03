@@ -1,5 +1,22 @@
-document.addEventListener("DOMContentLoaded", function fetchMovieData() {
-    fetch("http://localhost:5155/api/movies/")
+async function postData(url) {
+    const response = await fetch(url, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            "title": "The Matrix",
+            "type": "Movie",
+            "releaseYear": 1999,
+            "genre": "Sci-fi",
+            "director": "Lana Wachowski & Lilly Wachowski"
+})})
+}
+
+const _url = "https://upgraded-space-robot-4446xgqxgpj3j6r6-5155.app.github.dev/api/movies/cached"
+
+document.addEventListener("DOMContentLoaded", function fetchMovieData(url) {
+    fetch(_url,{ mode: "no-cors"})
         .then(response => response.json())
         .then(movies => {
             const listContainer = document.getElementById("movie-list");
@@ -33,5 +50,6 @@ document.addEventListener("DOMContentLoaded", function fetchMovieData() {
                 movieDiv.appendChild(imageURL);
                 listContainer.appendChild(movieDiv);
             });
+        
         })
 })

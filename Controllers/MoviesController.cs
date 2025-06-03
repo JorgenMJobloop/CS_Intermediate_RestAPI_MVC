@@ -8,10 +8,10 @@ public class MoviesController : ControllerBase
 
     private List<Movie> movies = new List<Movie>()
     {
-        new Movie {Id = 1, Title = "Inception", Type = "Movie", ReleaseYear = 2010, Genre = "Thriller", Director = "Christopher Nolan", ImageURL = "http://localhost:5155/Images/inception.jpg"},
-        new Movie {Id = 2, Title = "Breaking Bad", Type = "TV Show", ReleaseYear = 2008, Genre = "Crime/Drama", Director = "Vince Gillighan", ImageURL = "http://localhost:5155/Images/breaking_bad.jpg"},
-        new Movie {Id = 3, Title = "Fight Club", Type = "Movie", ReleaseYear = 1900, Genre = "Thriller/Crime/Drama", Director = "David Fincher", ImageURL = "http://localhost:5155/Images/fight.jpg"},
-        new Movie {Id = 4, Title = "Twin Peaks", Type = "TV Show", ReleaseYear = 1990, Genre = "Crime/Horror/Mystery/Soap", Director = "David Lynch", ImageURL = "http://localhost:5155/Images/peaks.jpg"}
+        new Movie {Id = 1, Title = "Inception", Type = "Movie", ReleaseYear = 2010, Genre = "Thriller", Director = "Christopher Nolan", ImageURL = "https://upgraded-space-robot-4446xgqxgpj3j6r6-5155.app.github.dev/Images/inception.jpg"},
+        new Movie {Id = 2, Title = "Breaking Bad", Type = "TV Show", ReleaseYear = 2008, Genre = "Crime/Drama", Director = "Vince Gillighan", ImageURL = "https://upgraded-space-robot-4446xgqxgpj3j6r6-5155.app.github.dev/Images/breaking_bad.jpg"},
+        new Movie {Id = 3, Title = "Fight Club", Type = "Movie", ReleaseYear = 1900, Genre = "Thriller/Crime/Drama", Director = "David Fincher", ImageURL = "https://upgraded-space-robot-4446xgqxgpj3j6r6-5155.app.github.dev/Images/fight.jpg"},
+        new Movie {Id = 4, Title = "Twin Peaks", Type = "TV Show", ReleaseYear = 1990, Genre = "Crime/Horror/Mystery/Soap", Director = "David Lynch", ImageURL = "https://upgraded-space-robot-4446xgqxgpj3j6r6-5155.app.github.dev/Images/peaks.jpg"}
     };
 
     public MoviesController(AppDbContext context)
@@ -25,12 +25,17 @@ public class MoviesController : ControllerBase
             _context.SaveChanges();
         }
     }
-
-
+    
     [HttpGet]
     public IEnumerable<Movie> GetAllMovies()
     {
         return _context.Movies.ToList();
+    }
+
+    [HttpGet("cached")]
+    public IEnumerable<Movie> GetCached()
+    {
+        return movies;
     }
 
     [HttpGet("{id}")]
@@ -46,5 +51,22 @@ public class MoviesController : ControllerBase
         {
             return NotFound();
         }
+    }
+
+    [HttpPost]
+    public ActionResult<Movie> Create([FromBody] MovieCreateDto dto)
+    {
+        var newMovie = new Movie
+        {
+            Id = movies.Any() ? movies.Max(m => m.Id) + 1 : 1,
+            Title = dto.Title,
+            Type = dto.Type,
+            ReleaseYear = dto.ReleaseYear,
+            Genre = dto.Genre,
+            Director = dto.Director
+        };
+
+        movies.Add(newMovie);
+        return CreatedAtAction(nameof(GetMovieById), new { id = newMovie.Id }, newMovie);
     }
 }
