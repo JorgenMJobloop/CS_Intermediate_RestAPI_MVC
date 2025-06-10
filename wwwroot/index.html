@@ -13,8 +13,32 @@
     <h1>
         Movie & Database App
     </h1>
+
+    <form id="movie-form" action="https://upgraded-space-robot-4446xgqxgpj3j6r6-5155.app.github.dev/api/movies/update" method="post">
+        <input type="text" id="title" placeholder="Title" name="Title" required>
+        <select id="type" name="Type">
+            <option>Movie</option>
+            <option>TV Show</option>
+        </select>
+        <input type="number" id="year" placeholder="Release year" name="ReleaseYear" required>
+        <input type="text" id="genre" placeholder="Genre" name="Genre" required>
+        <input type="text" id="director" placeholder="Director" name="Director" required>
+        <input type="url" id="image" placeholder="Image URL" name="ImageURL">
+        <button type="submit">Add Movie or TV Show</button>
+    </form>
+
+    <table id="movie-table">
+        <thead>
+            <tr>
+                <th>Title</th><th>Type</th><th>Release Year</th><th>Genre</th><th>Director</th><th>Poster</th>
+            </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+    </table>
+
     <div id="movie-list" class="movie-list"></div>
 </body>
 
-</html>
 </html>

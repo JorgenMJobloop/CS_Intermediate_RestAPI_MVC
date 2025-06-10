@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
@@ -5,7 +6,10 @@ using Microsoft.AspNetCore.Mvc;
 public class MoviesController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly IMapper _mapper;
 
+    // ImageURL = "../Images/{name}.{fileExtension}"
+    // ImageURL = "./public/Images/{name}.{fileExtension}"
     private List<Movie> movies = new List<Movie>()
     {
         new Movie {Id = 1, Title = "Inception", Type = "Movie", ReleaseYear = 2010, Genre = "Thriller", Director = "Christopher Nolan", ImageURL = "https://upgraded-space-robot-4446xgqxgpj3j6r6-5155.app.github.dev/Images/inception.jpg"},
@@ -14,9 +18,10 @@ public class MoviesController : ControllerBase
         new Movie {Id = 4, Title = "Twin Peaks", Type = "TV Show", ReleaseYear = 1990, Genre = "Crime/Horror/Mystery/Soap", Director = "David Lynch", ImageURL = "https://upgraded-space-robot-4446xgqxgpj3j6r6-5155.app.github.dev/Images/peaks.jpg"}
     };
 
-    public MoviesController(AppDbContext context)
+    public MoviesController(AppDbContext context, IMapper mapper)
     {
         _context = context;
+        _mapper = mapper;
 
         // If our database is currently empty, we can append data here
         if (!_context.Movies.Any())
@@ -25,11 +30,11 @@ public class MoviesController : ControllerBase
             _context.SaveChanges();
         }
     }
-    
+
     [HttpGet]
-    public IEnumerable<Movie> GetAllMovies()
+    public ActionResult<IEnumerable<Movie>> GetAllMovies()
     {
-        return _context.Movies.ToList();
+        return Ok(_context.Movies.ToList());
     }
 
     [HttpGet("cached")]
@@ -41,7 +46,7 @@ public class MoviesController : ControllerBase
     [HttpGet("{id}")]
     public ActionResult<Movie> GetMovieById(int id)
     {
-        var movie = movies.FirstOrDefault(mov => mov.Id == id);
+        var movie = _context.Movies.Find(id);
 
         if (movie != null)
         {
@@ -53,20 +58,18 @@ public class MoviesController : ControllerBase
         }
     }
 
-    [HttpPost]
-    public ActionResult<Movie> Create([FromBody] MovieCreateDto dto)
+    [HttpPost("update")]
+    public ActionResult<Movie> CreateUsingDTO([FromForm] MovieCreateDto dto)
     {
-        var newMovie = new Movie
+        if (!ModelState.IsValid)
         {
-            Id = movies.Any() ? movies.Max(m => m.Id) + 1 : 1,
-            Title = dto.Title,
-            Type = dto.Type,
-            ReleaseYear = dto.ReleaseYear,
-            Genre = dto.Genre,
-            Director = dto.Director
-        };
+            return BadRequest(ModelState);
+        }
 
-        movies.Add(newMovie);
-        return CreatedAtAction(nameof(GetMovieById), new { id = newMovie.Id }, newMovie);
+        var movie = _mapper.Map<Movie>(dto);
+        _context.Movies.Add(movie);
+        _context.SaveChanges();
+
+        return CreatedAtAction(nameof(GetMovieById), new { id = movie.Id }, movie);
     }
 }
