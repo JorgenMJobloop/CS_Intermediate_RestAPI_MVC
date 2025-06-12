@@ -19,7 +19,6 @@ function renderTable(movies, append=false) {
         img.alt = movie.title;
         img.style.width = "60px";
         imageCell.appendChild(img);
-
         tableBody.appendChild(row);
     })
 }
@@ -30,7 +29,25 @@ function createCell(text) {
     return cell;
 }
 
-const _url = "https://upgraded-space-robot-4446xgqxgpj3j6r6-5155.app.github.dev/api/movies"
+function updateImageOnly(id, imageUrl) {
+
+    fetch(`${_url}/${id}/update-image`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({imageURL : imageUrl})
+    })
+    .then(res => res.ok ? res.json() : Promise.reject(res)).then(result => {
+        console.log("Image updated successfully:", result);
+        location.reload();
+    }).catch(error => {
+        console.error("Error updating image:", error);
+    
+    });
+}
+
+const _url = "https://upgraded-space-robot-4446xgqxgpj3j6r6-5155.app.github.dev/api/movies";
 
 document.addEventListener("DOMContentLoaded", function fetchMovieData(url) {
     fetch(_url)

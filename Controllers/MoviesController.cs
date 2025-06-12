@@ -12,10 +12,10 @@ public class MoviesController : ControllerBase
     // ImageURL = "./public/Images/{name}.{fileExtension}"
     private List<Movie> movies = new List<Movie>()
     {
-        new Movie {Id = 1, Title = "Inception", Type = "Movie", ReleaseYear = 2010, Genre = "Thriller", Director = "Christopher Nolan", ImageURL = "https://upgraded-space-robot-4446xgqxgpj3j6r6-5155.app.github.dev/Images/inception.jpg"},
-        new Movie {Id = 2, Title = "Breaking Bad", Type = "TV Show", ReleaseYear = 2008, Genre = "Crime/Drama", Director = "Vince Gillighan", ImageURL = "https://upgraded-space-robot-4446xgqxgpj3j6r6-5155.app.github.dev/Images/breaking_bad.jpg"},
-        new Movie {Id = 3, Title = "Fight Club", Type = "Movie", ReleaseYear = 1900, Genre = "Thriller/Crime/Drama", Director = "David Fincher", ImageURL = "https://upgraded-space-robot-4446xgqxgpj3j6r6-5155.app.github.dev/Images/fight.jpg"},
-        new Movie {Id = 4, Title = "Twin Peaks", Type = "TV Show", ReleaseYear = 1990, Genre = "Crime/Horror/Mystery/Soap", Director = "David Lynch", ImageURL = "https://upgraded-space-robot-4446xgqxgpj3j6r6-5155.app.github.dev/Images/peaks.jpg"}
+        new Movie {Id = 1, Title = "Inception", Type = "Movie", ReleaseYear = 2010, Genre = "Thriller", Director = "Christopher Nolan", ImageURL = "./Images/inception.jpg"},
+        new Movie {Id = 2, Title = "Breaking Bad", Type = "TV Show", ReleaseYear = 2008, Genre = "Crime/Drama", Director = "Vince Gillighan", ImageURL = "./Images/breaking_bad.jpg"},
+        new Movie {Id = 3, Title = "Fight Club", Type = "Movie", ReleaseYear = 1900, Genre = "Thriller/Crime/Drama", Director = "David Fincher", ImageURL = "./Images/fight.jpg"},
+        new Movie {Id = 4, Title = "Twin Peaks", Type = "TV Show", ReleaseYear = 1990, Genre = "Crime/Horror/Mystery/Soap", Director = "David Lynch", ImageURL = "./Images/peaks.jpg"}
     };
 
     public MoviesController(AppDbContext context, IMapper mapper)
@@ -40,7 +40,7 @@ public class MoviesController : ControllerBase
     [HttpGet("cached")]
     public IEnumerable<Movie> GetCached()
     {
-        return movies;
+        return _context.Movies.ToList();
     }
 
     [HttpGet("{id}")]
@@ -71,5 +71,38 @@ public class MoviesController : ControllerBase
         _context.SaveChanges();
 
         return CreatedAtAction(nameof(GetMovieById), new { id = movie.Id }, movie);
+    }
+
+    [HttpGet("/imageproxy")]
+    private async Task<IActionResult> ProxyImage([FromQuery] string url)
+    {
+        if (!Uri.IsWellFormedUriString(url, UriKind.Absolute))
+        {
+            return BadRequest("Invalid URL");
+        }
+
+        using var client = new HttpClient();
+        var imageBytes = await client.GetByteArrayAsync(url);
+        return File(imageBytes, "image/jpeg");
+    }
+
+    [HttpPost("{id}/update-image")]
+    public IActionResult UpdateImage(int id, [FromBody] MovieUpdateDto dto)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var movie = _context.Movies.Find(id);
+        if (movie == null)
+        {
+            return NotFound();
+        }
+
+        movie.ImageURL = dto.ImageURL!.StartsWith("http") ? dto.ImageURL : $"./Images/{dto.ImageURL.Trim()}";
+        _context.SaveChanges();
+
+        return Ok(new { message = "Image updated", movie.ImageURL });
     }
 }
