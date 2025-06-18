@@ -1,7 +1,39 @@
-// Messy JS code :z
-function renderTable(movies, append=false) {
+function createCell(text) {
+    const cell = document.createElement("td");
+    cell.textContent = text;
+    return cell;
+}
+
+function updateImageOnly(id, imageUrl) {
+
+    fetch(`${_url}/${id}/update-image`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ imageURL: imageUrl })
+    })
+        .then(res => res.ok ? res.json() : Promise.reject(res)).then(result => {
+            console.log("Image updated successfully:", result);
+            location.reload();
+        }).catch(error => {
+            console.error("Error updating image:", error);
+
+        });
+}
+
+const _url = "https://upgraded-space-robot-4446xgqxgpj3j6r6-5155.app.github.dev/api/movies";
+
+document.addEventListener("DOMContentLoaded", function fetchMovieData(url) {
+    fetch(_url,)
+        .then(res => res.json())
+        .then(data => console.log(data))
+        .then(movies => renderTable(data));
+})
+
+function renderTable(movies, append = false) {
     const tableBody = document.querySelector("#movie-table tbody");
-    if(!append) tableBody.innerHTML = '';
+    if (!append) tableBody.innerHTML = '';
 
     movies.forEach(movie => {
         const row = document.createElement("tr");
@@ -22,35 +54,3 @@ function renderTable(movies, append=false) {
         tableBody.appendChild(row);
     })
 }
-
-function createCell(text) {
-    const cell = document.createElement("td");
-    cell.textContent = text;
-    return cell;
-}
-
-function updateImageOnly(id, imageUrl) {
-
-    fetch(`${_url}/${id}/update-image`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({imageURL : imageUrl})
-    })
-    .then(res => res.ok ? res.json() : Promise.reject(res)).then(result => {
-        console.log("Image updated successfully:", result);
-        location.reload();
-    }).catch(error => {
-        console.error("Error updating image:", error);
-    
-    });
-}
-
-const _url = "https://upgraded-space-robot-4446xgqxgpj3j6r6-5155.app.github.dev/api/movies";
-
-document.addEventListener("DOMContentLoaded", function fetchMovieData(url) {
-    fetch(_url)
-        .then(res => res.json())
-        .then(movies => renderTable(movies));
-})

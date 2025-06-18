@@ -14,8 +14,6 @@ public class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
         builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-
         builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
         var app = builder.Build();
@@ -27,15 +25,14 @@ public class Program
             app.UseSwaggerUI();
         }
 
+
         app.UseDefaultFiles();
         app.UseStaticFiles();
-
 
         app.UseHttpsRedirection();
 
         app.UseAuthorization();
 
-    
         app.MapControllers();
 
         app.Run();
